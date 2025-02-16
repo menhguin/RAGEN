@@ -50,7 +50,7 @@ We run RAGEN on Qwen-2.5-{0.5B, 3B}-{Instruct, None} and DeepSeek-R1-Distill-Qwe
 
 About the sokoban task (from the official repo): Sokoban is Japanese for warehouse keeper and a traditional video game. The game is a transportation puzzle, where the player has to push all boxes in the room on the storage locations/ targets. The possibility of making irreversible mistakes makes these puzzles so challenging especially for Reinforcement Learning algorithms, which mostly lack the ability to think ahead.
 
-NOTE: See [Visualization](https://github.com/ZihanWang314/ragen/#visualization) Section for details. The maximum reward of this environment is **10.9**. Action spaces are 0-4 (0: Stand, 1: Up, 2: Down, 3: Left, 4: Right).
+NOTE: See [Visualization](#visualization) Section for details. The maximum reward of this environment is **10.9**. Action spaces are 0-4 (0: Stand, 1: Up, 2: Down, 3: Left, 4: Right).
 
 <img src="./public/loss_curve.png" width="800px" alt="s" />
 
@@ -101,10 +101,10 @@ If you want to upload data to huggingface:
 ```python
 from huggingface_hub import HfApi
 api = HfApi()
-api.create_repo(repo_id='ZihanWang314/ragen-datasets', repo_type='dataset')
+api.create_repo(repo_id='anonymous/ragen-datasets', repo_type='dataset')
 api.upload_folder(
     folder_path='data/',
-    repo_id='ZihanWang314/ragen-datasets',
+    repo_id='anonymous/ragen-datasets',
     repo_type='dataset'
 )
 ```
@@ -227,11 +227,7 @@ sudo apt-get install fonts-noto-cjk
 <p align="center" style="display: flex; justify-content: center; gap: 10px;">
     <img src="./public/step_1.png" width="200px" alt="s" />
     <img src="./public/step_2.png" width="200px" alt="s" />
-<!--     <img src="./public/step_3.png" width="200px" alt="s" />
-    <img src="./public/step_4.png" width="200px" alt="s" />
-    <img src="./public/step_5.png" width="200px" alt="s" /> -->
 </p>
-
 
 4. Download visualization data from wandb:
 ```python
@@ -241,43 +237,10 @@ download_wandb("RUN_ID") # e.g., 9o465jqj
 
 ## Cases
 Please see cases/ file.
-There are only limited cases for now, including [reward hacking](https://github.com/ZihanWang314/agent-r1/blob/main/cases/reward_hacking.txt) and the [suck moment](https://github.com/ZihanWang314/agent-r1/blob/main/cases/suck_moment.txt). we will add more cases recently.
+There are only limited cases for now, including reward hacking and stuck moment cases. We will add more cases recently.
 
 ## Feedback
 
-We welcome all sorts of feedback! Please just raise an issue, no matter if it's any bugs you find or specific questions / suggestions regarding the project, so our team members won't be answering similar problems multiple times and thus would lead to more productive and efficient community building. Cheers!
+We welcome all sorts of feedback! Please just raise an issue, no matter if it's any bugs you find or specific questions / suggestions regarding the project, so we won't be answering similar problems multiple times and thus would lead to more productive and efficient community building. Cheers!
 
-
-
-## Authors
-
-[Zihan Wang*](https://zihanwang314.github.io/)
-
-[Kangrui Wang](https://jameskrw.github.io/)
-
-[Qineng Wang](https://qinengwang-aiden.github.io/)
-
-[Pingyue Zhang](https://williamzhangsjtu.github.io/)
-
-[Manling Li†](https://limanling.github.io)
-
-*: Project Lead; †: Advising.
-Remaining authors are alphabetical order.
-
-
-
-## Acknowledgements
-
-
-We thank [DeepSeek](https://github.com/deepseek-ai/DeepSeek-R1) for providing the DeepSeek-R1 model and ideas. We thank the [veRL](https://github.com/volcengine/verl) team for their infrastructure. We thank the [TinyZero](https://github.com/Jiayi-Pan/TinyZero) team for their discoveries that inspired our early exploration. We thank Yiping Lu, Runxin Xu, Kyunghyun Cho for insightful discussions with them.
-
-## Citation
-```md
-@misc{RAGEN,
-  author       = {Zihan Wang and Kangrui Wang and Qineng Wang and Pingyue Zhang and Manling Li},
-  title        = {RAGEN: A General-Purpose Reasoning Agent Training Framework},
-  year         = {2025},
-  organization = {GitHub},
-  url          = {https://github.com/ZihanWang314/ragen},
-}
 ```

@@ -3,8 +3,8 @@
 conda create -n ragen python=3.9 -y
 conda activate ragen
 
-
-git clone git@github.com:ZihanWang314/ragen.git
+# Clone repository
+git clone https://github.com/anonymous/ragen.git
 cd ragen
 
 pip install -e .
