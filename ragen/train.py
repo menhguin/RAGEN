@@ -72,11 +72,12 @@ def get_rl_train_command(config: Dict[str, Any]) -> str:
     # Define the command template with proper indentation
     env_kwargs = config['env']['env_kwargs']
     env_kwargs_str = " \\\n    ".join([
-        f"+env.{key}={value}" for key, value in env_kwargs.items()
+        f"+env.{key}={value}" if value is not None else f"+env.{key}=null" for key, value in env_kwargs.items()
     ])
    
     cmd = [
         f"VLLM_ATTENTION_BACKEND={config['system']['vllm_attention_backend']}",
+        f"CUDA_VISIBLE_DEVICES={config['system']['cuda_visible_devices']}",
         "python -m verl.trainer.main_ppo",
         f"multi_processing={config['system']['multi_processing']}",
         f"data.train_files={config['env']['data_dir']}/train.parquet",
@@ -112,6 +113,7 @@ def get_rl_train_command(config: Dict[str, Any]) -> str:
         f"actor_rollout_ref.rollout.temperature={config['training']['temperature']}",
         f"actor_rollout_ref.actor.state_masking={config['training']['state_masking']}",
         f"trainer.logger={config['logging']['mode']}",
+        f"+trainer.val_only={str(config['trainer']['val_only']).lower()}",
         f"+trainer.val_before_train={str(config['trainer']['val_before_train']).lower()}",
         f"trainer.default_hdfs_dir={config['trainer']['default_hdfs_dir'] or 'null'}",
         f"trainer.n_gpus_per_node={config['system']['n_gpus']}",

@@ -23,11 +23,11 @@ class SokobanEnv(BaseDiscreteActionEnv, GymSokobanEnv):
     }
 
     ACTION_LOOKUP = {
-        0: "none",
-        1: "up",
-        2: "down",
-        3: "left",
-        4: "right",
+        0: "None",
+        1: "Up",
+        2: "Down",
+        3: "Left",
+        4: "Right",
     }
 
     INVALID_ACTION = 0
@@ -58,6 +58,8 @@ class SokobanEnv(BaseDiscreteActionEnv, GymSokobanEnv):
         - 4: Right
         """
         DIRECTION_MAP = {"Up": 1, "Down": 2, "Left": 3, "Right": 4}
+        # TODO: originally, we parse either number (key of direction_map) or direction (value of direction_map).
+        # here we remove numbers and preserve directions only, but regex has not been removed. please remove them later.
         pattern = r'^\s*(([1-4])\s*\((up|down|left|right)\)|(up|down|left|right)|([1-4]))\s*$'
         match = re.fullmatch(pattern, text.strip(), flags=re.IGNORECASE | re.X)
         

@@ -1,5 +1,6 @@
 """
 Preprocess dataset for sokoban task - see rage/env/sokoban/sokoban.py for details
+The script filter the generated sokoban task by limiting the number of steps.
 """
 
 import re
@@ -14,7 +15,7 @@ import argparse
 import datasets
 
 from ragen.env.sokoban import SokobanEnv
-
+from ragen.env.sokoban.room_utils import get_shortest_action_path
 
 INSTRUCTION_TEMPLATE = """You are a Sokoban solver.
 
@@ -56,9 +57,9 @@ def main():
     parser.add_argument("--env", type=str, default="sokoban", help="Environment name (default: 'sokoban').")
     parser.add_argument("--algo", type=str, default="bfs", choices=["bfs"], help="Algorithm to use (default: 'bfs').")
     parser.add_argument("--seed", type=int, default=10000, help="Seed for random number generation (default: 10000).")
-    parser.add_argument("--output", type=str, default="data/sokoban", help="Output file to save the trajectories (default: 'data/sokoban').")
-    parser.add_argument("--train_size", type=int, default=300, help="Number of trajectories to generate (default: 3000).")
-    parser.add_argument("--test_size", type=int, default=10, help="Number of trajectories to generate (default: 100).")
+    parser.add_argument("--output", type=str, default="data/sokoban_easy", help="Output file to save the trajectories (default: 'data/sokoban').")
+    parser.add_argument("--train_size", type=int, default=10000, help="Number of trajectories to generate (default: 10000).")
+    parser.add_argument("--test_size", type=int, default=500, help="Number of trajectories to generate (default: 500).")
     parser.add_argument("--bfs_max_nodes", type=int, default=1000, help="Maximum number of nodes to use for BFS (default: 100000).") # not using this now. This will usually give the best traj. To compare with SFT, we will try this later.
     parser.add_argument("--prefix", type=str, default='qwen-instruct', choices=['qwen-instruct', 'base'])
 
@@ -68,11 +69,11 @@ def main():
     assert args.algo == "bfs", "Unsupported algorithm: {args.algo}"
     data_source = args.env
     
-    dim_x, dim_y, num_boxes, max_steps, search_depth = os.environ.get("DIM_X"), os.environ.get("DIM_Y"), os.environ.get("NUM_BOXES"), os.environ.get("MAX_STEPS"), os.environ.get("SEARCH_DEPTH")
-    dim_x, dim_y, num_boxes, max_steps, search_depth = int(dim_x), int(dim_y), int(num_boxes), int(max_steps), int(search_depth)
-
+    # dim_x, dim_y, num_boxes, max_steps, search_depth = os.environ.get("DIM_X"), os.environ.get("DIM_Y"), os.environ.get("NUM_BOXES"), os.environ.get("MAX_STEPS"), os.environ.get("SEARCH_DEPTH")
+    # dim_x, dim_y, num_boxes, max_steps, search_depth = int(dim_x), int(dim_y), int(num_boxes), int(max_steps), int(search_depth)
+    dim_x, dim_y, num_boxes, max_steps, search_depth = 6, 6, 1, 10, 30
     seeds = range(args.seed, args.seed + args.train_size + args.test_size)
-    instructions = []
+    train_set, test_set = [], []
     for seed in seeds:
         env = SokobanEnv(
             dim_room=(dim_x, dim_y),
@@ -81,8 +82,15 @@ def main():
             search_depth=search_depth
         )
         observation = env.reset(seed=seed, mode='tiny_rgb_array')
+        gt_action_sequence = get_shortest_action_path(env.room_fixed, env.room_state, MAX_DEPTH=100)
+        if gt_action_sequence is None or len(gt_action_sequence) > 2:
+            print(f"Warning: Action sequence length exceeds 2 {len(gt_action_sequence)} for seed {seed}")
+            continue
         instruction = INSTRUCTION_TEMPLATE.format(observation=observation)
-        instructions.append(instruction)
+        if seed < args.seed + args.train_size:
+            train_set.append((seed, instruction))
+        else:
+            test_set.append((seed, instruction))
     
     
     def _create_instance(idx, instruction):
@@ -95,8 +103,8 @@ def main():
             "reward_model": {"style": "rule", "ground_truth": {"target": 0, "numbers": [0, 0]}},
             "extra_info": {"split": "train", "index": idx}
         }
-    train_dataset = Dataset.from_list([_create_instance(args.seed + i, instructions[i]) for i in range(args.train_size)])
-    test_dataset = Dataset.from_list([_create_instance(args.seed + i, instructions[i]) for i in range(args.train_size, args.train_size + args.test_size)])
+    train_dataset = Dataset.from_list([_create_instance(seed, instruction) for seed, instruction in train_set])
+    test_dataset = Dataset.from_list([_create_instance(seed, instruction) for seed, instruction in test_set])
 
 
     def make_map_fn(split):

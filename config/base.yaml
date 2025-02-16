@@ -31,13 +31,13 @@ training:
   total_epochs: 5
   temperature: 0.7
   use_sft: false
-  use_kl_loss: True # this means actor KL Loss
+  use_kl_loss: true # this means actor KL Loss
   no_think_rl: false
   state_masking: false
   binary_reward: false
   mask_state: false
   length_penalty: false
-  total_training_steps: 200
+  total_training_steps: null
 
 # Optimization parameters
 optimization:
@@ -58,28 +58,13 @@ logging:
 
 # Trainer settings
 trainer:
-  val_before_train: false
+  val_before_train: true
+  val_only: false
   default_hdfs_dir: null
   nnodes: 1
   save_freq: 100
   test_freq: 100
   project_name: "RAGEN"
-
-
-# System settings
-system:
-  cuda_visible_devices: 0
-  python_hash_seed: 10000
-  n_gpus: 1
-  multi_processing: "ray"
-  vllm_attention_backend: "XFORMERS"
-
-# Model settings
-model:
-  base_model: "Qwen/Qwen2.5-0.5B-Instruct"
-  experiment_name: "ragen-main-exp"
-  gradient_checkpointing: true
-
 
 # SFT settings
 sft:
@@ -88,6 +73,7 @@ sft:
 
   # Data generation parameters
   data_generation:
+    data_dir: "sft/data"
     algo: "bfs"
     seed: 100000 # needs to be different from the seed in the RL config
     train_size: 1000
@@ -120,7 +106,7 @@ sft:
     dim_x: 6
     dim_y: 6
     num_boxes: 1
-    max_steps: 5
+    max_steps: 100
     search_depth: 30
   
   # FrozenLake-specific settings
